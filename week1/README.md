@@ -1,4 +1,5 @@
-# Week 1 notes
+# Shuhe'A Creative Coding Repository
+
 
 ---
 
