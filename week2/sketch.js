@@ -1,6 +1,5 @@
 function setup() {
   createCanvas(windowWidth, windowHeight); // create a canvas that fits the window
-  noLoop(); // only draw once, no loop
 }
 
 function draw() {
