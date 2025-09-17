@@ -1,8 +1,14 @@
+// variable declaration
+// "let" is a keyword that allows you to declare you varible
+// in the below example, a new variable is being created
+// called "circleSize" wich is storing a number (125)
 
+// below are GLOBAL variables; they are accessible by any block of code
+let circleSize //variable to store circle size
 
 function setup() {// runs once at startup
-  createCanvas(400, 400);// set a 400px by 400ps canvas
-  
+  createCanvas(windowWidth, windowHeight);// set a 400px by 400ps canvas
+  circleSize=width*0.35
 }
 
 function draw() {
@@ -14,9 +20,15 @@ function draw() {
 
   background("rgba(180, 114, 114, 1)");
 
+  noStroke();
+  fill("");
+  rect(0,0,width/2,height/2);
+  rect(width/2,height/2,width/2,height/2);
+
   //stroke and fill change the color of drawn shapes
-  stroke("rgba(167, 55, 55, 0)")
-  fill("rgba(0,0,0,0)")
+  stroke("rgba(218, 213, 64, 0.91)")
+  fill("rgba(72, 211, 37, 0.74)")
+
 
   strokeWeight(5)
   //noStroke(): gets rid of the stroke completely
@@ -26,14 +38,33 @@ function draw() {
   circle(200,100,50);
 
   //setting a new fill for m rectangle
-  fill("rgba(201, 65, 65, 0)")
+  fill("rgba(31, 176, 46, 0.87)")
   //rect takes 4 parameters
   //x coord of top left, y coord of top left, width and height
-  rect(100,300,150,50)
+  rect(100,300,150,50);
   //ellipse takes 4 parameters
   //x coord of center, y coord of center, width and height
-  ellipse(250,80,10,20)
+  ellipse(250,80,10,20);
 
-  //
+  //line  connects two coords: x1,x2,x3,x4
   line(250,130,260,130)
+
+  //to draw complex polygons (more than 2 coords)
+  //create a beginShape(); function and a endShape function
+  //any vertex(x,y) functionsyou place inbetween beginShape and endShape
+  //will be rendered as points in a compleye polygon
+  beginShape()
+  vertex(100,100)//leftmost coordinate
+  vertex(200,100)//top right coordinate
+  vertex(100,150)//bottom-most coordinate
+  endShape(CLOSE)//Close parameter closes the polygon
+
+  fill("rgba(194, 27, 27, 1)")
+  //circle(width/2,height/2,width/2.75)
+  //ellipse(mouseX,mouseY,mouseX,mouseY)
+  
+  //
+  //
+  arc(width/2,height*0.75,100,100,-PI/2,PI/2)
+  arc(100,200,100,100,radians(30-mouseX),radians(330+mouseX),PIE)
 }
