@@ -5,6 +5,7 @@
 
 // below are GLOBAL variables; they are accessible by any block of code
 let circleSize //variable to store circle size
+let redColor="rgba(35, 179, 90, 0.7)"
 
 function setup() {// runs once at startup
   createCanvas(windowWidth, windowHeight);// set a 400px by 400ps canvas
@@ -12,6 +13,8 @@ function setup() {// runs once at startup
 }
 
 function draw() {
+
+  console.log(mouseX/width + " " +mouseX/height)
   // a grayscale color is denoted as a number 0-255
   // an rgb color is denoted as 3 numbers (red green blue)
   // background{127,0,0}
@@ -63,8 +66,9 @@ function draw() {
   //circle(width/2,height/2,width/2.75)
   //ellipse(mouseX,mouseY,mouseX,mouseY)
   
-  //
-  //
+  // arcs are like ellipses, except they have two extra parameters
+  // start and end, which are peovided in RADIANS format
+  // you can convert degrees to radians using the radians() function
   arc(width/2,height*0.75,100,100,-PI/2,PI/2)
   arc(100,200,100,100,radians(30-mouseX),radians(330+mouseX),PIE)
 }
