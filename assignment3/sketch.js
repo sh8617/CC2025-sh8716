@@ -41,7 +41,7 @@ function draw() {
 
   if (t <= 0.25) {
     // Night to dawn: dark blue to light blue
-    // The specific RGB value comes from the parameter reference in Adobe Illustrator
+    // The specific RGB value comes from the reference in Adobe Illustrator
     skyR = map(t, 0.0, 0.25, 20, 150);
     skyG = map(t, 0.0, 0.25, 30, 180);
     skyB = map(t, 0.0, 0.25, 60, 210);
@@ -76,7 +76,7 @@ function draw() {
 
   // Sun: Moving along a semi-circular arc
   // The movement of the sun is represented by a semi-circular trajectory to show the passage of time (0 to 180°: from left to right)
-  // Parameter selection:
+  // Number selection:
   let cx = width / 2;     // The center of the circle is in the middle of the canvas (visual balance)
   let cy = height / 2;    // The center of the circle is on the window frame line (where the sun "rises")
   let radius = 250;       // Set the radius to 250, covering exactly the upper half of the sky
@@ -381,3 +381,4 @@ function draw() {
   textSize(12);
   text(hour() + ':' + minute() + ':' + second(), 20, height - 10);//The text above the corner represents the actual elapsed time, but the scene is an abstract representation of it. 
 }
+
