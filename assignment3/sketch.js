@@ -86,13 +86,15 @@ function draw() {
   //When the angleθequals 0 °: cos (0) equals 1, the point is on the far right.
   //When the angle θ equals 90 °: cos (90) equals 0, sin (90) equals 1, the point is at the top.
   //When the angle θ equals 180 °: cos (180) equals -1, the point is on the far left.
-//After adding a negative sign, it just rises from left to right.
+  //After adding a negative sign, it just rises from left to right.
   // -Sin/cos calculation makes the sun move in an arc up and down, appearing natural
   // -Cx, cy represent the center of a semicircle
   let sunX = cx - cos(angle) * radius;  // Lateral movement (cos control left and right)
-//*radius can be from the left point for sunrise, sunset to the right point
+  //*radius can be from the left point for sunrise, sunset to the right point
   let sunY = cy - sin(angle) * 180;     // Longitudinal curvature (sin controls up and down)
-//Because I don't want the sun to move too high, so * 180
+  //reference link：https://p5js.org/reference/p5/sin/
+  //reference link：https://p5js.org/reference/p5/cos/
+  //Because I don't want the sun to move too high, so * 180
 
 
   noStroke();
