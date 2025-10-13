@@ -1,135 +1,119 @@
 // Assignment 1: Shuhe Huang's Geometric Abstraction
-// Reproduction of an abstract painting with custom color palette
-// Requirements: multiple shapes, variables, beginShape/vertex/endShape, 
-// color variables, scalable design
+// Requirements: multiple shapes, variables, beginShape/vertex/endShape, scalable design
+// Color reference in https://kgolid.github.io/chromotome-site/
+// I made some attempts in interaction: let the two circles scale according to the mouse; The overall image is written in a relative size format that can be scaled according to the window (using width/height as the ratio).
 
-// custom color palette (picked from Adobe Color)
-let palette = ["#E05C49", "#739E8B", "#6ADEA9", "#89736F", "#4D5E57", "#342422", "#DFDCD4"];
 
 function setup() {
-  // set canvas size to always fit the browser window
+  // Canvas is created according to the window size, so that the composition can adapt to different screens with relative size
   createCanvas(windowWidth, windowHeight); 
 }
 
 function draw() {
-  // background color
-  // I used map() here so the background color changes with the mouse position. 
-  // mouseX goes from 0..width, but I remap it into 0..255, which is the valid color range.
-  // This way, when the mouse moves left to right, the background fades from black to white. 
-  // Reference: https://p5js.org/reference/p5/map/
+  // Use map() to map mouseX (0 to width) to grayscale values of 0 to 255（ https://p5js.org/reference/p5/map/ ）
+  // By moving the mouse from left to right, the background will gradually change from black to white. This interaction can make the screen less static.
   let bg = map(mouseX, 0, width, 0, 255);
   background(bg);
-  
 
-  // some helper variables so code is easier to read
-  let margin = width * 0.05;  
+  // For readability, calculate some commonly used size points in advance
+  let margin = width * 0.05;  // I originally intended to use this variable for the margin, but I didn't use it directly in the composition, but kept it as a holder
   let halfW = width / 2;
   let halfH = height / 2;
 
-  // --- Main blue cross ---
-  // these two big rectangles form the cross in the middle
-  fill(palette[1]); 
+  // Central "cross" main shape (green)
+  // Fold two long rectangles together to form a cross; All dimensions are written in width/height ratio to ensure that the composition relationship remains unchanged when the window changes.
+  fill("#739E8B"); 
   noStroke();
-  rect(halfW - width * 0.05, 0, width * 0.07, height); // vertical bar
-  rect(width / 4, halfH - height * 0.05, width, height * 0.07); // horizontal bar
+  rect(halfW - width * 0.05, 0, width * 0.07, height);       // vertical bar
+  rect(width / 4, halfH - height * 0.05, width, height * 0.07); // strip
+  // These specific values were obtained through multiple experiments, including later ones
   
-  // extra polygon piece to make the diagonal cut
+  // Diagonal small polygon: Use beginShape,vertex,endShape to add a diagonal edge
+  // I am adjusting and looking at the values here, mainly relying on visual alignment; After being written in proportional form, changing the screen can also maintain the position relationship of this oblique edge.
   beginShape();
-  vertex(width * 0.1, height*0.37);  
-  vertex(width / 4, halfH - height * 0.05);  
-  vertex(width / 3.9, halfH - height * 0.05);
-  vertex(width / 4, halfH + height * 0.02); 
+  vertex(width * 0.1,  height * 0.37);  
+  vertex(width / 4,    halfH - height * 0.05);  
+  vertex(width / 3.9,  halfH - height * 0.05);
+  vertex(width / 4,    halfH + height * 0.02); 
   vertex(width * 0.082, halfH - height * 0.07); 
   endShape(CLOSE);
   
-  // --- Red cross (top left small one) ---
-  stroke(palette[1]);
+  // The thin "cross" line in the upper left corner (using the same color scheme, maintaining consistency) 
+  stroke("#739E8B");
   strokeWeight(4);
   line(0, halfH * 0.3, halfW * 0.3, halfH * 0.3);
   line(halfW * 0.11, halfH * 0.2, halfW * 0.11, halfH * 0.4);
   
-  // --- Top left diagonal black shape ---
-  fill(palette[5]); 
+  // Brown diagonal quadrilateral in the upper left corner
+  // Here, a solid color block is used to press down on a portion of the area, creating a front and back hierarchy. The vertices are also written in proportion.
+  fill("#342422"); 
   noStroke();
   beginShape();
   vertex(width * 0.15, 0);  
   vertex(width * 0.21, 0);  
-  vertex(width * 0.1, height*0.37); 
-  vertex(width * 0.05, height*0.349); 
+  vertex(width * 0.1,  height * 0.37); 
+  vertex(width * 0.05, height * 0.349); 
   endShape(CLOSE);
 
-  // --- Top left yellow circle (interactive) ---
-  // this circle rotates and scales with the mouse
-  //reference: push(), pop() → [https://p5js.org/reference/p5/push/][https://p5js.org/reference/p5/pop/]
-  // reference: translate(), rotate(), scale() → [https://p5js.org/reference/p5/translate/][https://p5js.org/reference/p5/rotate/][https://p5js.org/reference/p5/scale/]
+  // Top left green circle
+  // I want this circle to be related to the mouse, with mouseY controlling the zoom.
+  // I use push()/pop() here to limit displacement, rotation, and scaling only within this circle to avoid affecting other graphics
   push(); 
-  // push() is like "save the canvas settings right now", so the changes (move, rotate, scale) won't mess up other shapes.
-  translate(halfW * 0.62, halfH * 0.61); // move the drawing origin (0,0) to the circle’s center
-
-  let angle = map(mouseX, 0, width, 0, TWO_PI); 
-  // map mouseX (0 → canvas width) into an angle (0 → 2*PI radians)
-  // this way moving the mouse left/right makes the circle rotate
-  rotate(angle);
-  // rotate the coordinate system by that angle
-
+  translate(halfW * 0.62, halfH * 0.61); // Move the coordinate origin to the center of this circle
+  // Map mouseY from 0 to height to 0.5 to 1.5 (I have tried using 0.3 as too small and 2 as too large, the range of 0.5 to 1.5 is more stable)
   let s = map(mouseY, 0, height, 0.5, 1.5); 
-  // map mouseY (0 → canvas height) into a scale factor (0.5 → 1.5)
-  // so moving the mouse up/down makes the circle shrink or grow
   scale(s);
-  // actually scale the shape by that factor
-
+  // Scale ratio using scale()（ https://p5js.org/reference/p5/scale/ ）
+  // I found that zooming directly will also enlarge/thicken the strokes, making them look inconsistent.
+  // So write strokeWeight as 6/s, so that the line becomes thicker when zooming in and thinner when zooming in, visually maintaining a similar thickness.
   noFill();
-  stroke(palette[2]);
-  strokeWeight(6 / s); // "fix" line thickness while scaling
-  ellipse(0, 0, width * 0.17); // draw at (0,0) because we already moved
+  stroke("#6ADEA9");
+  strokeWeight(6 / s);
+  ellipse(0, 0, width * 0.17); // Draw on (0,0) because it has already been translated above
   pop();
-  // pop() is like "go back to the saved canvas settings"
-  // so the translate/rotate/scale only affect this circle
 
-  // --- Top right red circle + blue cross (interactive circle) ---
-  push();
-  translate(halfW * 1.8, halfH * 0.45); // move to circle center
-
-  let angle1 = map(mouseX, 0, width, 0, PI); // rotate half circle range
-  rotate(angle1);
-
-  let s1 = map(mouseY, 0, height, 0.5, 1.5); // scale factor
+  // The red circle in the upper right corner and the green line next to it
+  // This red circle also has a similar interaction: mouseY controls scaling.
+  push()
+  translate(halfW * 1.8, halfH * 0.45);
+  let s1 = map(mouseY, 0, height, 0.5, 1.5);
   scale(s1);
-
   noFill();
-  stroke(palette[0]);
+  stroke("#E05C49");
   strokeWeight(6 / s1);
   ellipse(0, 0, width * 0.13);
   pop();
 
-  // blue cross lines
-  stroke(palette[1]);
-  line(halfW * 1.4, halfH * 0.33, halfW * 1.7, halfH * 0.33);
+  // The two green short lines on the right are used to echo the main color shape in the center
+  stroke("#739E8B");
+  line(halfW * 1.4,  halfH * 0.33, halfW * 1.7,  halfH * 0.33);
   line(halfW * 1.55, halfH * 0.05, halfW * 1.55, halfH * 0.48);
 
-  // --- Slanted black rectangle (top right) ---
-  stroke(palette[5]);
+  // Right diagonal black box line
+  // Use wireframes instead of fill colors here
+  stroke("#342422");
   noFill();
   beginShape();
   vertex(halfW * 1.45, halfH * 0.55);
   vertex(halfW * 1.65, halfH * 0.55);
-  vertex(halfW * 1.85,  halfH - height * 0.05);
-  vertex(halfW * 1.65,  halfH - height * 0.05);
+  vertex(halfW * 1.85, halfH - height * 0.05);
+  vertex(halfW * 1.65, halfH - height * 0.05);
   endShape(CLOSE);
 
-  // --- Bottom left black rectangle ---
-  fill(palette[5]);
+  // Bottom left black rectangle
+  // This piece is relatively heavy, used to press down on the lower left corner to give the picture a sense of weight.
+  fill("#342422");
   noStroke();
   rect(0, halfH * 1.04, halfW * 0.5, halfH * 0.9);
 
-  // --- Green parallelogram (bottom left, interactive scaling) ---
+  // Bottom left green parallelogram (interactive scaling)
+  // I want the shape in the lower left corner to have a breathing sensation with the mouseY, so I made a vertical scaling.
+  // Similarly, use push/pop to limit the transformation range internally.
   push(); 
-  translate(halfW * 0.7, halfH * 1.7); // move to shape center
-
-  let s2 = map(mouseY, 0, height, 0.1, 0.7); // scale with mouseY
+  translate(halfW * 0.7, halfH * 1.7);
+  let s2 = map(mouseY, 0, height, 0.1, 0.7); // Don't set the upper limit too high here, otherwise it will block too much
   scale(s2);
-  fill(palette[2]);
-
+  fill("#6ADEA9");
   beginShape();
   vertex(-width * 0.14, -height * 0.2);
   vertex( width * 0.05, -height * 0.2);
@@ -138,30 +122,32 @@ function draw() {
   endShape(CLOSE);
   pop();
 
-  // --- Bottom left red cross ---
-  stroke(palette[0]);
+  // Bottom left red cross
+  // Make it more like a "mark" with line width to remind that there is a boundary point here
+  stroke("#E05C49");
   strokeWeight(6);
-  line(halfW * 0.505, halfH * 1.25, halfW * 0.85, halfH * 1.25);
-  line(halfW * 0.68, halfH * 1.1, halfW * 0.68, halfH * 1.37);
+  line(halfW * 0.505, halfH * 1.25, halfW * 0.85,  halfH * 1.25);
+  line(halfW * 0.68,  halfH * 1.1,  halfW * 0.68,  halfH * 1.37);
 
-  // --- Bottom left slanted white rect with yellow line ---
+  // Bottom left white box and green line above it
   stroke(255);
   noFill();
   beginShape();
   vertex(halfW * 0.25, halfH * 1.15);
   vertex(halfW * 0.45, halfH * 1.15);
-  vertex(halfW * 0.3, halfH * 1.6);
-  vertex(halfW * 0.1, halfH * 1.6);
+  vertex(halfW * 0.3,  halfH * 1.6);
+  vertex(halfW * 0.1,  halfH * 1.6);
   endShape(CLOSE);
 
-  stroke(palette[2]);
+  stroke("#6ADEA9");
   line(halfW * 0.13, halfH * 1.25, halfW * 0.495, halfH * 1.25);
 
-  // --- Bottom right green cross ---
-  fill(palette[0]); 
+  // Red cross at the bottom right (solid heart block)
+  // Create a block intersection in the lower right corner and compare it with the white box in the lower left corner.
+  fill("#E05C49"); 
   noStroke();
   rect(width * 0.75, height * 0.58, width * 0.07, height * 0.33); 
-  rect(width * 0.75, height * 0.7, width * 0.33, height * 0.07);
+  rect(width * 0.75, height * 0.7,  width * 0.33, height * 0.07);
   beginShape();
   vertex(width * 0.52, height * 0.66);  
   vertex(width * 0.75, height * 0.7);   
@@ -170,23 +156,23 @@ function draw() {
   vertex(width * 0.52, height * 0.66 + height * 0.07); 
   endShape(CLOSE);
   
-  // --- Bottom right black cross ---
-  stroke(palette[5]);
+  // Black "cross" line at the bottom right
+  stroke("#342422");
   strokeWeight(6);
-  line(halfW * 1.3, halfH * 1.25, width, halfH * 1.25);
+  line(halfW * 1.3,  halfH * 1.25, width, halfH * 1.25);
   line(halfW * 1.85, halfH * 1.048, halfW * 1.85, halfH * 1.76);
   
-  // --- Bottom frame (gray) ---
+  // Brown box above and below
   noStroke();
-  fill(palette[3]);
+  fill("#89736F");
   rect(0, height * 0.95, width, height * 0.07);
-
-  // --- Top frame (gray) ---
-  fill(palette[3]);
+  fill("#89736F");
   rect(0, 0, width, height * 0.07);
 }
 
-// redraw canvas if window is resized
+// When the window size changes, readjust the canvas size
+// I want my work to maintain consistent proportional relationships on different screens, so I used this function.
+// When the window size changes, the system will call it.（https://p5js.org/reference/p5/windowResized/）
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
@@ -196,12 +182,10 @@ function windowResized() {
 // Link: [https://artsandculture.google.com/asset/four-spaces-with-broken-cross-plate-14-from-art-d-aujourd-hui-ma%C3%8Etres-de-l-art-abstrait-album-i-0003/igGdXWACZo2CDQ
 // I applied a custom color palette and flexible geometry based on width and height properties,
 // so the layout is the representation of a pattern scale up or down.
-//To improve the interactive aspect I added more four: yellow circle, red circle, and green parallelogram now rotating or resizing based on the mouse movement.
+//To improve the interactive aspect I added more four: green circle, red circle, and green parallelogram now resizing based on the mouse movement.
 //For this I used more p5.js functions are:
 //translate() [https://p5js.org/reference/p5/translate/],
-//rotate() [https://p5js.org/reference/p5/rotate/],
 //scale() [https://p5js.org/reference/p5/scale/],
 //map() [https://p5js.org/reference/p5/map/],
 //and windowResized() [https://p5js.org/reference/p5/windowResized/].
-//With these, I was able to translate (move) the origin of the drawing, rotate polygons, scale shapes relative to the mouse’s location, and even have the canvas respond to window resizing automatically.//
-// There are comments above every almost every block of code that explains what it's doing. 
+//With these, I was able to translate (move) the origin of the drawing, scale shapes relative to the mouse’s location, and even have the canvas respond to window resizing automatically.
