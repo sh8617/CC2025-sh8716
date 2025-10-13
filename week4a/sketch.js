@@ -1,246 +1,105 @@
-// Assignment 2 - Generative Pattern
-// My idea: a grid of eyes that follow the mouse, with colors and shapes that change.
-// I wanted to mix playfulness (the eyes) with interaction (mouse moves).
-
-
-let cell = 100; 
-// I want each eye to sit in a 100px grid space.
-// each eye’s “cell size” (spacing between eyes)
-let cols, rows; 
-// Will calculate how many rows and columns fit on the screen.
+// Assignment 2: Generative Pattern
 
 function setup() {
-  createCanvas(windowWidth, windowHeight); 
-  cols = floor(width / cell);
-  // Divide width by cell size, use floor so I don’t get half cells.
-  // reference link：https://p5js.org/reference/p5/floor/
-  // use floor to make sure column count is an integer (drop decimals)
-  // number of columns (width ÷ cell size)
-  rows = floor(height / cell);
-  // Same for height, this way rows stay clean and even.
-  // number of rows (height ÷ cell size)
-  // use floor so rows are whole numbers, no fractions
-  ellipseMode(CENTER);
-  // draw circles from their center, easier to position.
-}
-
-function drawGradient(c1, c2) {    
-  // reference link：https://p5js.org/reference/p5/function/
-  // A function I wrote to paint the background with a gradient.         
-  // custom function to draw gradient background
-  // c1 and c2 are two color inputs (color1, color2)
-  for (let y = 0; y < height; y++) {
-    // Go through every horizontal line on the canvas. 
-    // loop from the top of the screen (y=0) down to the bottom (y=height)
-    let inter = map(y, 0, height, 0, 1);  
-    // inter is a ratio (0 to 1)
-    // Turn the y position into a 0–1 ratio.
-    // map(y, 0, height, 0, 1) turns y from range [0, height] into [0, 1]
-    // example: if y is in the middle (height/2), inter = 0.5
-    let c = lerpColor(c1, c2, inter);
-    // Blend the two colors based on that ratio.
-    // lerpColor blends two colors together
-    // c1 = start color, c2 = end color, inter = how much to mix
-    // inter=0: all c1, inter=1: all c2, inter=0.5: halfway blend
-    stroke(c);
-    // stroke sets the pen color to that blended color
-    line(0, y, width, y);
-    // draw a horizontal line with the blended color at this y position
-    // from left side (x=0) to right side (x=width)
-  }
+  createCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
-  drawGradient(color('#FCA5F1'), color('#B5FFFF'));
-  // background goes from pink to blue I thought looked nice.
-  
-  for (let j = 0; j < rows; j++) {
-    // Outer loop: go over every row.
-    // j starts at 0, then 1, 2… until j is one less than rows.
-    for (let i = 0; i < cols; i++) {
-      // Inner loop: go over every column inside this row.
-      // i starts at 0 and walks across the grid.
+  // this for loop increments y from 0 to the height of the canvas
+  // it draws a line every 5 pixels, and changes the hue of the stroke color
+  // to create a gradient effect
+  // Gradient colors: # FCA5F1, # B5FFFF
+  // #FCA5F1 is (252,165,241), #B5FFFF is (181,255,255)
+  // This is based on the method taught by the teacher
+  for (let y = 0; y<height; y+=5) {
+    let r = map(y, 0, height, 252, 181);
+    let g = map(y, 0, height, 165, 255);
+    let b = map(y, 0, height, 241, 255);
+    stroke(r, g, b);
+    strokeWeight(5);
+    line(0, y, width, y);
+  }
+  //noLoop(); // prevents draw from looping
+  // Eye grid, place one eye every 100px, leaving 50px margins around each side
+  for (let y = 50; y < height - 50; y += 100) {
+    for (let x = 50; x < width - 50; x += 100) {
       push();
-      // save the current drawing state (position, styles, etc.)
-      translate(i * cell + cell/2, j * cell + cell/2);
-      // Move the “origin” (0,0) to the "center of this grid cell".
-      // i * cell and j * cell jump to the cell’s top-left.
-      // + cell/2 shifts to the middle so circles are centered.
+      // everything within this push/pop block
+      // will be centered, with 0,0 as the center
+      //point
+      translate(x, y); // The center of each eye
 
-      // progress value t, changes with row
-      let t = map(j, 0, rows-1, 0, 1);
-      // Turn the row number into a 0 to 1 value:
-      // top row (j=0) gives 0, bottom row (j=rows-1) gives 1.
-      // Using rows-1 ensures the bottom row reaches 1 exactly.
-
-
-      // eye size grows bigger in lower rows
-      let eyeSize = lerp(60, 120, t);
-      // reference link: https://p5js.org/reference/p5/lerp/
-      // I wanted smaller eyes on top and bigger ones at the bottom.
-      // I tested a few ranges and 60–120 felt right.
-      // Pick a size between 60 and 120 based on t.
-      // lerp means "linear interpolation"
-      // it picks a value between 60 and 120
-      // t is a number between 0 and 1
-      // if t = 0: result = 60
-      // if t = 1: result = 120
-      // if t = 0.5: result = 90 (halfway between 60 and 120)
-      // so t works like a slider that blends between 60 and 120
+      // The size of the eyes changes with the number of movements (the lower the movement, the larger the movement)
+      let eyeSize = map(y, 50, height - 50, 60, 120);
       let pupilSize = eyeSize * 0.5;
-      // Make the pupil half the eye’s size (nice and proportional).
 
-      // pupil follows the mouse
-      // left-right
-      let offsetX = map(mouseX, 0, width, -eyeSize/6, eyeSize/6);
-      // Horizontal pupil drift. When the mouse is at the left edge,
-      // I tried a few values like /8 or /10, but /6 looked most natural.
-      // offset is -eyeSize/6; at the right edge it’s +eyeSize/6. 
-      // So the pupil “looks” left and right with the mouse.
+      // Pupil follows the mouse (left, right, up and down), with a white radius of eyeSize/2 and a pupil radius of eyeSize/4
+      // Map() maps the mouse position to a small displacement. The displacement should not be too large, otherwise it will "turn white".
+      // First, provide a target displacement range, and then use constrict() for secondary protection.
+      let offsetX = map(mouseX, 0, width, -eyeSize / 6, eyeSize / 6);
+      let offsetY = map(mouseY, 0, height, -eyeSize / 6, eyeSize / 6);
+      // Prevent the pupils from running out of the white range of the eyes
+      // /6 as the target range, the response is more obvious; /8 as a limit, ensure that it will not exceed the limit.
+      // The choices of/6 and/8 are my tactile values after multiple tests
+      // Use the constraint function to restrict the movement of offsetX（https://p5js.org/reference/p5/constrain/）
+      offsetX = constrain(offsetX, -eyeSize / 8, eyeSize / 8);
       
       
-      // up-down
-      let offsetY = map(mouseY, 0, height, -eyeSize/6, eyeSize/6);
-      // Vertical pupil drift. Same idea but up/down using mouseY.
-
-      // stop pupil from moving too far out
-      offsetX = constrain(offsetX, -eyeSize/4, eyeSize/4);
-      // reference link：https://p5js.org/reference/p5/constrain/
-      // Safety: clamp the X offset so the pupil can’t slide too far.
-      // It stays within [-eyeSize/4, +eyeSize/4].
-      offsetY = constrain(offsetY, -eyeSize/8, eyeSize/8);
-      // Safety for Y as well. Vertical range is a bit tighter so
-      // the pupil won’t “fall” out of the lower eyelid.
-
-      // draw eyeball background (light pink)
-      fill("rgb(249,200,248)");
-      // eye color changes with row and mouse
-      let r = map(j, 0, rows-1, 249, 180);// red changes with row
-      let g = map(mouseX, 0, width, 200, 255);// green changes with mouseX
-      let b = map(mouseY, 0, height, 248, 180);// blue changes with mouseY
-      // if mouse is pressed, use dynamic colors. So I wanted the color to shift with mouse and row position.
-      if (mouseIsPressed) {
-        fill(r, g, b);
-        stroke(r, g, b);
-      } else {
-        fill(249, 200, 248);// otherwise stay pink
-        stroke(249, 200, 248);
-      }
-      stroke("rgb(249,200,248)");
+      
+      // White eyes (light powder)
+      stroke(249, 200, 248);
+      fill(249, 200, 248);
       ellipse(0, 0, eyeSize, eyeSize);
-      // Eye color changes only when the mouse is pressed.
 
-      
-      // pupil color
-      // Pupil color is linked to row, column, and mouse.
-      let pr = map(i, 0, cols-1, 50, 200);
-      // red changes with column
-      let pg = map(j, 0, rows-1, 50, 200);
-      // green changes with row
+      // The default pupil color is black, and it changes color when pressed with the mouse (depending on position), so that each eye is slightly different when pressed.
+      let pr = map(x, 50, width - 50, 50, 200);
+      let pg = map(y, 50, height - 50, 50, 200);
       let pb = map(mouseX, 0, width, 50, 255);
-      // blue changes with mouseX
-      // I wanted the pupil color to shift based on position, so every eye looks a bit different.
-
-      // pupil is black unless mouse pressed
       if (mouseIsPressed) {
         fill(pr, pg, pb);
-        // if the mouse is clicked, fill the pupil with colors
-        // pr, pg, pb are numbers for red, green, blue color channels
-        // they change depending on row, column, or mouse position
       } else {
         fill(0);
       }
       noStroke();
       ellipse(offsetX, offsetY, pupilSize, pupilSize);
-      // draw the pupil (a circle), normally black, but colorful when clicked.
-      // offsetX: how far left/right the pupil is, following the mouse
-      // offsetY: how far up/down the pupil is, following the mouse
-      // pupilSize: width of the circle
-      // pupilSize again: height of the circle (same, so it's a perfect circle)
 
-      
-      // A simple diamond shape I made for extra detail.
-      // function to draw a diamond shape
-      // x, y: the center point of the diamond
-      // w: how wide the diamond is
-      // h: how tall the diamond is
-      function detail(x, y, w, h) {
+      // Press the mouse and draw a colored diamond in the pupil
+      // I want to make the details more 'toy like'
+      if (mouseIsPressed) {
+        // Color follows mouse position
+        let cr = map(mouseX, 0, width, 100, 255);
+        let cg = map(mouseY, 0, height, 100, 255);
+        let cb = map(mouseX + mouseY, 0, width + height, 150, 255);
+        fill(cr, cg, cb);
+        noStroke();
+        // Draw a diamond directly
         beginShape();
-        vertex(x, y - h/2);
-        // top point
-        // take the center y and move UP by half the height
-        // h/2 makes sure the top is exactly half the height above center
-        vertex(x + w/6, y);
-        // right point
-        // take the center x and move RIGHT by 1/6 of the width
-        // "w/6" keeps the diamond skinny, not stretched too wide
-        // y stays the same, so it’s horizontally aligned
-        vertex(x, y + h/2);
-        // bottom point
-        // take the center y and move DOWN by half the height
-        // matches the "top point" but in the opposite direction
-        vertex(x - w/6, y);
-        // left point
-        // take the center x and move LEFT by 1/6 of the width
-        // again, y stays the same so it’s horizontal
+        vertex(offsetX, offsetY - pupilSize / 2);          // top
+        vertex(offsetX + pupilSize * 0.1 , offsetY);        // right
+        // In order to make the diamond appear thinner, it occupies about 20% of the size of the pupil, while the left and right sides each occupy 10%
+        vertex(offsetX, offsetY + pupilSize / 2);          // bottom
+        vertex(offsetX - pupilSize * 0.1, offsetY);        // left
         endShape(CLOSE);
       }
 
-      // if mouse pressed, draw a colored diamond in the pupil
-      if (mouseIsPressed) {
-        let r = map(mouseX, 0, width, 100, 255);
-        // pick a red value from mouseX (from 100 to 255)
-        let g = map(mouseY, 0, height, 100, 255);
-        // pick a green value from mouseY (from 100 to 255)
-        let b = map(mouseX + mouseY, 0, width + height, 150, 255);
-        // pick a blue value from mouseX+mouseY (from 100 to 255)
-
-        // set fill color using r,g,b values
-        fill(r, g, b);
-        noStroke();
-        detail(offsetX, offsetY, pupilSize * 0.4, pupilSize * 1); 
-        // Add a colored diamond inside the pupil when mouse is pressed.
-        // center X: same as the pupil center, follows the mouse
-        // center Y: same as the pupil center
-        // width: 40% of the pupil size (keeps it skinny)
-        // height: same as the pupil size (tall diamond)
-        // draw the diamond at the pupil position
-      }
-
-      // cover top half of the eye with white arc (upper eyelid)
-      fill(255); 
-      stroke("#FFFFFF");
+      // Cover the upper eyelid to make it look more like a blink
+      fill(255);
+      stroke(255);
       strokeWeight(1.5);
       arc(0, 0, eyeSize, eyeSize, PI, TWO_PI, CHORD);
-      // arc(x, y, w, h, startAngle, stopAngle, mode)
-      // arc draws a slice of a circle. I’m using it here to make the eyelid shape.
-      // angles are in radians: 0 is at 3 o’clock, PI is 9 o’clock, TWO_PI is 3 o’clock again
-      // from PI to TWO_PI draws the top half of the circle (moving across the top)
-      // CHORD closes the arc with a straight line between the ends
 
-      // draw eyelids (dark arcs), controlled by mouseY
+      // Eyelid line, slightly closed with mouseY
       noFill();
-      stroke("rgb(96,44,95)");
+      stroke(96, 44, 95);
       strokeWeight(3);
-      let eyelid = map(mouseY, 0, height, 0, PI/2);
-      // mouseY decides open/close
-      // Map mouseY to an angle amount. At the top of the screen: eyelid ≈ 0 (wide open).
-      // At the bottom: eyelid ≈ PI/2 (more closed).
-      arc(0, 0, eyeSize, eyeSize, PI+eyelid, TWO_PI-eyelid);
-      // top lid
-      // Start a little to the right of 9 o’clock (PI + eyelid),
-      // end a little to the left of 3 o’clock (TWO_PI - eyelid).
-      // As eyelid grows, both ends move toward the center, making the opening smaller.
-      arc(0, 0, eyeSize, eyeSize, 0+eyelid, PI-eyelid); 
-      // bottom lid
-      // Start a little to the right of 3 o’clock (0 + eyelid),
-      // end a little to the left of 9 o’clock (PI - eyelid).
-      // Same idea: larger eyelid angle = arcs close in.
-      
+      let eyelid = map(mouseY, 0, height, 0, PI / 2);
+      // Upper eyelid line
+      arc(0, 0, eyeSize, eyeSize, PI + eyelid, TWO_PI - eyelid);
+      // Lower eyelid line
+      arc(0, 0, eyeSize, eyeSize, 0 + eyelid, PI - eyelid);
 
-
-      pop(); 
-      // restore drawing state
+      pop();
     }
   }
 }
+
