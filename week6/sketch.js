@@ -28,3 +28,9 @@ function drawDrunk(speed,hue,diameter) {
 //定义函数
 //来不及写了，继续专心听，就是将drunk里的参数替换draw里的，然后 draw里改成:"drawDrunk(x,x,x)"
 //老师把上面的draw复制进去了
+
+class Drunk {
+  constructon(x,y,diameter,speed,hue){
+    
+  }
+}
