@@ -1,3 +1,5 @@
+
+
 let cam;                   // Camera object (p5 video capture)
 let step = 12;             // Square brick edge length (pixels)
 let doMirror = true;       // Do want to do a horizontal mirror or not
@@ -121,15 +123,11 @@ function draw() {
       // After adding the dark angle coefficient, fill in the color, and the color near the edge of the canvas will automatically become darker; The range of vignette K is controlled between 0 and 1, so multiplying it will not change the original color tone, but only gradually make the brightness lighter or darker according to distance. In this way, the final drawn square brick will have a dark corner effect
       fill(r * vignetteK, g * vignetteK, b * vignetteK);
 
-         // The geometric center of the current tile (use step instead of size to make the grid more neat)
-      let cxTile = px + step * 0.5;
-      let cyTile = py + step * 0.5;
-
       // Perform separate coordinate transformation and rotation for each tile
       push();
 
       // Move the coordinate system to the center of the current tile, so that all shapes drawn later have the center as the origin
-      translate(cxTile, cyTile);
+      translate(mx, my);
 
       // Calculate an angle related to time and position, so that each tile rotates independently
       // Using sin for slight oscillation, 0.2 is a relatively gentle arc, and the block size will only breathe slightly within 20% of the range. t is the global time, allowing all blocks to rise and fall together with time (breathing effect). x * 0.3 can cause different columns (x direction) to have a slight time offset, forming horizontal ripples. y * 0.4 is different rows (y direction), also with time offset, forming vertical ripples. Combined, they form a smooth transition "breathing texture like water waves". The values are obtained from multiple tests
@@ -212,6 +210,16 @@ function draw() {
     colorMode(RGB, 255);
     noStroke();  // Restore to the unpainted state and maintain consistency with the original state
   }
+  // Text
+  fill(255);
+  textSize(12);
+  textAlign(LEFT, TOP);
+  text("↑ / ↓ : Adjust the size of the mosaic block", 10, 10);
+  text("M : Switch mirror",           10, 26);
+  text("R : Switch breathing effect",       10, 42);
+  text("V : Switch dark corner",           10, 58);
+  text("C : Switch color mode",       10, 74);
+  text("S : Switch shape mode",       10, 90);
   // Advance time, drive breathing animation
   t += 0.03;
 }
@@ -245,7 +253,7 @@ function reorderRGB(r, g, b, mode, x, y) {
       return [r, b, g];
     }
   }
-  // 模Mode 2: Divide into three categories based on which color channel is the largest
+  // Mode 2: Divide into three categories based on which color channel is the largest
   // By comparing the size of r/g/b
   if (mode == 2) {
     // Use the simplest logic to roughly separate colors based on 'which channel is the largest'
