@@ -1,5 +1,3 @@
-
-
 let cam;                   // Camera object (p5 video capture)
 let step = 12;             // Square brick edge length (pixels)
 let doMirror = true;       // Do want to do a horizontal mirror or not
